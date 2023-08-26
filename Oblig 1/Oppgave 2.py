@@ -16,6 +16,7 @@ def test_feil(funk):
     c = np.ones(51)  # Koeffisienter for polynom: 1 + x + x^2 + ... + x^50
     x = 1.00001
     Px = (x ** 51 - 1) / (x - 1)  # Ekvivalent uttrykk for polynom fra oppgavetekst, evaluert i x=1.00001
-    return round(abs(Px - funk(c, x)), 23) # Trenger ikke å runde av
+    error = (abs(Px - funk(c, x)))
+    return "{:.11e}".format(error)
 
 print(test_feil(nest))
