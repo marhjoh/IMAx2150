@@ -1,4 +1,5 @@
 import numpy as np
+
 def bisection(f, a, b, eps):
     it = 0
     nr = 0 #maximum iterations allowed

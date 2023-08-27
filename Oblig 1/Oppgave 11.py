@@ -1,15 +1,20 @@
 import numpy as np
+from decimal import Decimal, getcontext
+
+# Angi antall desimaler for høy presisjon
+getcontext().prec = 50  # Angi ønsket antall desimaler
 
 # Lengdene av kateterne og det lengste beinet
-katet_a = 3344556600.0
-katet_b = 1.2222222
+a = Decimal("3344556600.0")
+b = Decimal("1.2222222")
 
 # Beregn hypotenusen
-hyp = np.sqrt(katet_a**2 + katet_b**2)
-print(hyp-katet_a)
+c = np.sqrt(a**2 + b**2)
+#print(hyp - katet_a)
 
 # Finn differansen mellom hypotenusen og det lengste beinet
-diff = hyp - max(katet_a, katet_b)
+diff = c - max(a, b)
 
-# Skriv ut resultatet
-print(f"Hypotenusen er {diff:.12f} lengdeenheter lenger enn det lengste beinet.")
+# Skriv ut resultatet med høy presisjon
+print(f"Hypotenusen er {diff:.50f} lengdeenheter lenger enn det lengste beinet i trekanten.")
+print(c-a)
