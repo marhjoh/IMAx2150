@@ -17,4 +17,3 @@ diff = c - max(a, b)
 
 # Skriv ut resultatet med høy presisjon
 print(f"Hypotenusen er {diff:.50f} lengdeenheter lenger enn det lengste beinet i trekanten.")
-print(c-a)
