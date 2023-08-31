@@ -1,7 +1,8 @@
 n = 5000
-time_backsubstitution = n**2 * 0.005
-time_gauss_elimination = (2/3) * n**3 * 0.005
-total_time = time_backsubstitution + time_gauss_elimination
+equations = n**2
+time = 5e-3
+time_gauss_elimination = (2 * n**3 / 3)
+total_time = (time_gauss_elimination/equations) * time
 
 # Konverter total_time til nærmeste hele sekund
 total_time_seconds = round(total_time)
