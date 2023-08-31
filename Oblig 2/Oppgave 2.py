@@ -12,11 +12,11 @@ def fikspunkt_solve(g, x0, tol):
 
     return x_i
 
-f1 = lambda x: x ** 3 - 2 * x + 2
-f2 = lambda x: np.exp(x) + x - 7
-f3 = lambda x: np.exp(x) + np.sin(x) - 4
+f1 = lambda x: np.cbrt(2*x+2)
+f2 = lambda x: np.log(7-x)
+f3 = lambda x: np.log(4 - np.sin(x))
 
-startverdier = [1.5, 1.5, 1.0]  # Passende startverdier for hver funksjon
+startverdier = [np.sqrt((2/3)), 1.5, 1.0]  # Passende startverdier for hver funksjon
 funcs = [f1, f2, f3]
 maks_feil = 1e-8
 sols = []
