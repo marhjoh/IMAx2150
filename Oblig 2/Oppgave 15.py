@@ -23,15 +23,33 @@ def LUfactorize(A):
     return L, U
 
 
-# Eksempel
-A = np.array([[1.0, 2, -1], [0, 3, 1], [2, -1, 1]])
-A = A.reshape((3, 3))
+def LUsolve(L, U, b):
+    c = np.zeros_like(b)
+    n = len(c)
+
+    for i in range(n):
+        c[i] = b[i]
+        for j in range(i):
+            c[i] -= L[i, j] * c[j]
+
+    x = np.zeros_like(b)
+
+    for i in range(n - 1, -1, -1):
+        x[i] = c[i]
+        for j in range(i + 1, n):
+            x[i] -= U[i, j] * x[j]
+        x[i] /= U[i, i]
+
+    return x
+
+
+A = np.array([[3.0, 1.0, 2.0], [6.0, 3.0, 4.0], [3.0, 1.0, 5.0]])
+b = np.array([0.0, 1.0, 3.0])  # Define b as a float array
 
 try:
     L, U = LUfactorize(A)
-    print("Matrise L:")
-    print(L)
-    print("Matrise U:")
-    print(U)
+    x = LUsolve(L, U, b)
+    print("Løsning x:")
+    print(x)
 except np.linalg.LinAlgError as e:
     print(f"LinAlgError: {e}")
