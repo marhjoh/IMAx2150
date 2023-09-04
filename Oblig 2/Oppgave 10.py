@@ -12,18 +12,17 @@ def naive_gauss_with_backsub(A, b):
             for k in range(j + 1, n + 1):
                 S[i, k] = S[i, k] - mult * S[j, k]
 
-    # Tilbakeinnsetting
-    x = np.zeros(n)
+    x = S[:, -1]
     for i in range(n - 1, -1, -1):
-        x[i] = S[i, -1] / S[i, i]
-        for j in range(i - 1, -1, -1):
-            S[j, -1] = S[j, -1] - S[j, i] * x[i]
-
+        for j in range(i + 1, n):
+            x[i] = x[i] - S[i, j] * x[j]
+        x[i] = x[i] / S[i, i]
     return x
 
-# Definer A og b
-A = np.array([[1, 2, -1], [0, 3, 1], [2, -1, 1]])
-b = np.array([2, 4, 2]).reshape((-1,))  # Definer b som en vektor med form (3,)
+
+A = np.array([1, 2, -1, 0, 3, 1, 2, -1, 1])
+A = A.reshape((3, 3))
+b = np.array([2, 4, 2]).T
 x = naive_gauss_with_backsub(A, b)
 print("Løsning x: ")
 print(x)
