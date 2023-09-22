@@ -3,49 +3,46 @@ from numpy.linalg import solve
 import matplotlib.pyplot as plt
 
 def getNAK_System(x_coords, y_coords):
-    n = x_coords.size
+    n = x_coords.size  # Number of points
 
-    # Compute differences
-    delta = np.diff(x_coords)
-    BigDelta = np.diff(y_coords)
+    # Calculate delta_i = x_(i+1) - x_i
+    delta = np.array([x_coords[i] - x_coords[i - 1] for i in range(1, n)])
 
-    # Initialize the system matrix A
-    A = np.zeros((n - 2, n - 2))
+    # Calculate BigDelta_i = y_(i+1) - y_i
+    BigDelta = np.array([y_coords[i] - y_coords[i - 1] for i in range(1, n)])
 
-    # Fill the diagonals with A
-    for i in range(n - 2):
-        A[i, i] = 2 * (delta[i] + delta[i + 1])
-        if i > 0:
-            A[i, i - 1] = delta[i]
-            A[i - 1, i] = delta[i]
+    # Create the tridiagonal matrix A
+    A = np.zeros((n, n))
+    A[0, 0] = 1
+    A[-1, -1] = 1
 
-    # Initialize the right-hand side vector b
-    b = np.zeros(n - 2)
+    for i in range(1, n - 1):
+        A[i, i - 1] = delta[i - 1]
+        A[i, i] = 2 * (delta[i - 1] + delta[i])
+        A[i, i + 1] = delta[i]
 
-    for i in range(n - 2):
-        b[i] = 3 * (BigDelta[i] / delta[i + 1] - BigDelta[i + 1] / delta[i])
+    # Create the right-hand side vector b
+    b = np.zeros(n)
+    for i in range(1, n - 1):
+        b[i] = 3 * (BigDelta[i] / delta[i] - BigDelta[i - 1] / delta[i - 1])
 
     return A, b
 
 def getNAK_splines(A, b, x_coords, y_coords):
     n = x_coords.size
-    delta = np.diff(x_coords)
-    BigDelta = np.diff(y_coords)
 
-    # Solve the system for c values
-    c = np.zeros(n)
-    c[1:-1] = solve(A, b)
+    # Solve the linear system for c
+    c = solve(A, b)
 
-    # Compute d values
-    d = np.zeros(n - 1)
-    for i in range(n - 1):
-        d[i] = (c[i + 1] - c[i]) / (3 * delta[i])
-
-    # Compute a and b values
+    # Calculate coefficients a, b, and d
     a = y_coords[:-1]
+    d = np.zeros(n - 1)
     b = np.zeros(n - 1)
+
     for i in range(n - 1):
-        b[i] = (BigDelta[i] / delta[i]) - (delta[i] / 3) * (2 * c[i] + c[i + 1])
+        d[i] = (c[i + 1] - c[i]) / (3 * (x_coords[i + 1] - x_coords[i]))
+        b[i] = (y_coords[i + 1] - y_coords[i]) / (x_coords[i + 1] - x_coords[i]) - (x_coords[i + 1] - x_coords[i]) * (
+                    2 * c[i] + c[i + 1]) / 3
 
     return a, b, c, d
 
@@ -55,13 +52,12 @@ y = np.array([2, 1, 4, 3., 0, 2])
 A, bs = getNAK_System(x, y)
 a, b, c, d = getNAK_splines(A, bs, x, y)
 
-# Plot the cubic splines
-for i in range(len(x) - 1):
-    S = lambda t, i=i: a[i] + b[i] * (t - x[i]) + c[i] * (t - x[i]) ** 2 + d[i] * (t - x[i]) ** 3
-    t = np.linspace(x[i], x[i + 1], 100)
-    plt.plot(t, S(t))
+# Plot the splines
+for i in range(len(a)):
+    xi = np.linspace(x[i], x[i + 1], 100)
+    yi = a[i] + b[i] * (xi - x[i]) + c[i] * (xi - x[i]) ** 2 + d[i] * (xi - x[i]) ** 3
+    plt.plot(xi, yi)
 
-# Plot data points
 plt.scatter(x, y, c='red', label='Data Points')
 plt.xlabel('X')
 plt.ylabel('Y')
