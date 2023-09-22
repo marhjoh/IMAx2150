@@ -3,30 +3,46 @@ from numpy.linalg import solve
 import matplotlib.pyplot as plt
 
 def getNAK_System(x_coords, y_coords):
-    n = x_coords.size  # Number of points
+    n = x_coords.size  # Antall punkter
 
-    # Calculate delta_i = x_(i+1) - x_i
+    # delta_i = x_(i+1) - x_i
     delta = np.array([x_coords[i] - x_coords[i - 1] for i in range(1, n)])
 
-    # Calculate BigDelta_i = y_(i+1) - y_i
+    # BigDelta_i = y_(i+1) - y_i
     BigDelta = np.array([y_coords[i] - y_coords[i - 1] for i in range(1, n)])
 
-    # Create the tridiagonal matrix A
     A = np.zeros((n, n))
-    A[0, 0] = 1
-    A[-1, -1] = 1
 
-    for i in range(1, n - 1):
-        A[i, i - 1] = delta[i - 1]
-        A[i, i] = 2 * (delta[i - 1] + delta[i])
-        A[i, i + 1] = delta[i]
+    # Man kan fylle diagonaler i numpy feks slik:
+    lowerDiag = np.array([delta[i - 1] for i in range(1, n)])
+    # negativ indeksering indekserer baklengs x[-1] = siste element
+    lowerDiag[-1] = 1
+    # Før vi fyller diagonalen slicer vi matrisen A slik at
+    # diagonalen like under hoveddiagonal blir den nye hoveddiagonalen
+    # (vi fyller hoveddiagonalen på matrisen vi får ved å fjerne øverste rad og siste kolonne)
+    np.fill_diagonal(A[1:, :-1], lowerDiag)
 
-    # Create the right-hand side vector b
+    mainDiag = np.ones(n)
+    mainDiag[-1] = -1
+    mainDiag[1:-1] = np.array([2 * (delta[i - 1] + delta[i]) for i in range(1, n - 1)])
+
+    upperDiag = np.array([delta[i] for i in range(n - 1)])
+    upperDiag[0] = -1
+
+    np.fill_diagonal(A, mainDiag)
+    np.fill_diagonal(A[:-1, 1:], upperDiag)
+
     b = np.zeros(n)
-    for i in range(1, n - 1):
-        b[i] = 3 * (BigDelta[i] / delta[i] - BigDelta[i - 1] / delta[i - 1])
+    b[1:-1] = np.array([3 * (BigDelta[i] / delta[i] - BigDelta[i - 1] / delta[i - 1]) for i in range(1, n - 1)])
 
     return A, b
+
+x = np.array([1, 2, 4, 5., 7, 9])
+y = np.array([2, 1, 4, 3., 0, 2])
+A, bs = getNAK_System(x, y)
+
+# Now, you can solve the linear system and compute the spline coefficients
+spline_coefs = np.linalg.solve(A, bs)
 
 def getNAK_splines(A, b, x_coords, y_coords):
     n = x_coords.size
@@ -46,11 +62,13 @@ def getNAK_splines(A, b, x_coords, y_coords):
 
     return a, b, c, d
 
-x = np.array([1, 2, 4, 5., 7, 9])
-y = np.array([2, 1, 4, 3., 0, 2])
-
 A, bs = getNAK_System(x, y)
 a, b, c, d = getNAK_splines(A, bs, x, y)
+
+a_t = a
+b_t = b
+c_t = c
+d_t = d
 
 # Plot the splines
 for i in range(len(a)):
